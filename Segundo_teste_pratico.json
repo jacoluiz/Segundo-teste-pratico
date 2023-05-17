@@ -1,0 +1,105 @@
+{
+	"info": {
+		"_postman_id": "53ae5127-417e-4d9e-a779-ba3a03f6148b",
+		"name": "New Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7944934",
+		"_collection_link": "https://euprefeito.postman.co/workspace/Segundo-teste-pratico~9eb5c6e7-c4e8-4fd4-9330-1fd616953676/collection/7944934-53ae5127-417e-4d9e-a779-ba3a03f6148b?action=share&creator=7944934&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "BuscarEnderço",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Obter o CEP da variável de ambiente\r",
+							"const cep = pm.environment.get('cep');\r",
+							"\r",
+							"// Construir o corpo da solicitação\r",
+							"const requestBody = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r",
+							"<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:cli=\"http://cliente.bean.master.sigep.bsb.correios.com.br/\">\r",
+							"  <soapenv:Header/>\r",
+							"  <soapenv:Body>\r",
+							"    <cli:consultaCEP>\r",
+							"      <cep>${cep}</cep>\r",
+							"    </cli:consultaCEP>\r",
+							"  </soapenv:Body>\r",
+							"</soapenv:Envelope>`;\r",
+							"\r",
+							"// Definir as opções da solicitação\r",
+							"const options = {\r",
+							"  method: 'POST',\r",
+							"  url: 'https://apps.correios.com.br/SigepMasterJPA/AtendeClienteService/AtendeCliente',\r",
+							"  header: {\r",
+							"    'Content-Type': 'text/xml',\r",
+							"  },\r",
+							"  body: requestBody,\r",
+							"};\r",
+							"\r",
+							"// Enviar a solicitação para a API dos Correios\r",
+							"pm.sendRequest(options, function (err, response) {\r",
+							"  if (err) {\r",
+							"    console.error(err);\r",
+							"    return;\r",
+							"  }\r",
+							"  \r",
+							"\r",
+							"  var resposta = xml2Json(response.text());\r",
+							"  resposta = resposta['soap:Envelope']['soap:Body']['ns2:consultaCEPResponse']['return'];\r",
+							"\r",
+							"  pm.expect(resposta.bairro).to.not.empty;\r",
+							"  pm.expect(resposta.cep).to.not.empty;\r",
+							"  pm.expect(resposta.cidade).to.not.empty;\r",
+							"  pm.expect(resposta.complemento2).to.not.empty;\r",
+							"  pm.expect(resposta.end).to.not.empty;\r",
+							"  pm.expect(resposta.uf).to.not.empty;\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:cli=\"http://cliente.bean.master.sigep.bsb.correios.com.br/\">\r\n  <soapenv:Header/>\r\n  <soapenv:Body>\r\n    <cli:consultaCEP>\r\n      <cep>{{cep}}</cep>\r\n    </cli:consultaCEP>\r\n  </soapenv:Body>\r\n</soapenv:Envelope>"
+				},
+				"url": {
+					"raw": "https://apps.correios.com.br/SigepMasterJPA/AtendeClienteService/AtendeCliente",
+					"protocol": "https",
+					"host": [
+						"apps",
+						"correios",
+						"com",
+						"br"
+					],
+					"path": [
+						"SigepMasterJPA",
+						"AtendeClienteService",
+						"AtendeCliente"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
